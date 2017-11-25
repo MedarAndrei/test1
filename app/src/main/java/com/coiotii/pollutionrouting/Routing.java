@@ -265,6 +265,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -279,15 +280,14 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnMarkerDragListener{
+        GoogleMap.OnMarkerClickListener {
 
 
     private GoogleMap mMap;
     private GoogleApiClient client;
     private LocationRequest locationRequest;
     private Location lastlocation;
-    private Marker currentLocationmMarker;
+    private Marker currentLocationMarker;
     private Marker lastSearchMarker = null;
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
@@ -365,9 +365,9 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         lastlocation = location;
-        if(currentLocationmMarker != null)
+        if(currentLocationMarker != null)
         {
-            currentLocationmMarker.remove();
+            currentLocationMarker.remove();
 
         }
         Log.d("lat = ",""+latitude);
@@ -376,9 +376,10 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         markerOptions.position(latLng);
         markerOptions.title("Current Location");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        currentLocationmMarker = mMap.addMarker(markerOptions);
+        markerOptions.draggable(true);
+        currentLocationMarker = mMap.addMarker(markerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
+        mMap.animateCamera(CameraUpdateFactory.zoomBy(14));
 
         if(client != null)
         {
@@ -410,6 +411,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
 
                     try {
                         addressList = geocoder.getFromLocationName(location, 1);
+//                        mMap.getMyLocation()
 
                         if(addressList != null)
                         {
@@ -420,8 +422,29 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                                 markerOptions.position(latLng);
                                 markerOptions.title(location);
                                 lastSearchMarker = mMap.addMarker(markerOptions.draggable(true));
+                                mMap.setOnMarkerDragListener(new OnMarkerDragListener() {
+                                    @Override
+                                    public void onMarkerDragStart(Marker marker) {
+
+                                    }
+
+                                    @Override
+                                    public void onMarkerDrag(Marker marker) {
+                                        //marker.setDraggable(true);
+                                    }
+
+                                    @Override
+                                    public void onMarkerDragEnd(Marker marker) {
+                                        //marker.getPosition();
+                                        Toast.makeText(Routing.this, marker + " " + lastSearchMarker + " " + currentLocationMarker, Toast.LENGTH_SHORT).show();
+                                        if (marker == lastSearchMarker)
+                                            lastSearchMarker.setPosition(marker.getPosition());
+                                        else if (marker == currentLocationMarker)
+                                            currentLocationMarker.setPosition(marker.getPosition());
+                                    }
+                                });
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
                             }
                         }
                     } catch (IOException e) {
@@ -429,51 +452,60 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                     }
                 }
                 break;
-            case R.id.B_hospitals:
-                mMap.clear();
-                String hospital = "hospital";
-                String url = getUrl(latitude, longitude, hospital);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(Routing.this, "Showing Nearby Hospitals", Toast.LENGTH_SHORT).show();
-                break;
-
-
-            case R.id.B_schools:
-                mMap.clear();
-                String school = "school";
-                url = getUrl(latitude, longitude, school);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(Routing.this, "Showing Nearby Schools", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.B_restaurants:
-                mMap.clear();
-                String resturant = "restuarant";
-                url = getUrl(latitude, longitude, resturant);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(Routing.this, "Showing Nearby Restaurants", Toast.LENGTH_SHORT).show();
-                break;
+//            case R.id.B_hospitals:
+//                mMap.clear();
+//                String hospital = "hospital";
+//                String url = getUrl(latitude, longitude, hospital);
+//                dataTransfer[0] = mMap;
+//                dataTransfer[1] = url;
+//
+//                getNearbyPlacesData.execute(dataTransfer);
+//                Toast.makeText(Routing.this, "Showing Nearby Hospitals", Toast.LENGTH_SHORT).show();
+//                break;
+//
+//
+//            case R.id.B_schools:
+//                mMap.clear();
+//                String school = "school";
+//                url = getUrl(latitude, longitude, school);
+//                dataTransfer[0] = mMap;
+//                dataTransfer[1] = url;
+//
+//                getNearbyPlacesData.execute(dataTransfer);
+//                Toast.makeText(Routing.this, "Showing Nearby Schools", Toast.LENGTH_SHORT).show();
+//                break;
+//            case R.id.B_restaurants:
+//                mMap.clear();
+//                String resturant = "restuarant";
+//                url = getUrl(latitude, longitude, resturant);
+//                dataTransfer[0] = mMap;
+//                dataTransfer[1] = url;
+//
+//                getNearbyPlacesData.execute(dataTransfer);
+//                Toast.makeText(Routing.this, "Showing Nearby Restaurants", Toast.LENGTH_SHORT).show();
+//                break;
             case R.id.B_to:
-                mMap.clear();
+
 //                Toast.makeText(this, "aaaa", Toast.LENGTH_LONG).show();
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(end_latitutde, end_longitude));
-                markerOptions.title("Destination");
-                markerOptions.draggable(true);
+//                MarkerOptions markerOptions = new MarkerOptions();
 
 
-                float[] res = new float[5];
+
+//                Toast.makeText(this, "Latitude + " + end_latitutde + " longitude " + end_longitude, Toast.LENGTH_LONG).show();
+
+
+//                markerOptions.position(new LatLng(end_latitutde, end_longitude));
+//                markerOptions.title("Destination");
+//                markerOptions.draggable(true);
+
+                end_latitutde = lastSearchMarker.getPosition().latitude;
+                end_longitude = lastSearchMarker.getPosition().longitude;
+
+                float[] res = new float[1];
                 Location.distanceBetween(latitude, longitude, end_latitutde, end_longitude, res);
-                markerOptions.snippet("Distance " + res[0]);
-                mMap.addMarker(markerOptions);
+//                markerOptions.snippet("Distance " + res[0]);
+                Toast.makeText(this, "Distance " + res[0], Toast.LENGTH_LONG).show();
+//                mMap.addMarker(markerOptions);
                 break;
         }
     }
@@ -543,22 +575,6 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     public boolean onMarkerClick(Marker marker) {
         marker.setDraggable(true);
         return false;
-    }
-
-    @Override
-    public void onMarkerDragStart(Marker marker) {
-
-    }
-
-    @Override
-    public void onMarkerDrag(Marker marker) {
-        marker.setDraggable(true);
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-        end_latitutde = marker.getPosition().latitude;
-        end_longitude = marker.getPosition().longitude;
     }
 }
 
