@@ -288,6 +288,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     private LocationRequest locationRequest;
     private Location lastlocation;
     private Marker currentLocationmMarker;
+    private Marker lastSearchMarker = null;
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude,longitude;
@@ -360,6 +361,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location location) {
 
+//        mMap.clear();
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         lastlocation = location;
@@ -401,8 +403,13 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 {
                     Geocoder geocoder = new Geocoder(this);
 
+                    if (lastSearchMarker != null) {
+                        lastSearchMarker.remove();
+                    }
+
+
                     try {
-                        addressList = geocoder.getFromLocationName(location, 5);
+                        addressList = geocoder.getFromLocationName(location, 1);
 
                         if(addressList != null)
                         {
@@ -412,7 +419,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                                 MarkerOptions markerOptions = new MarkerOptions();
                                 markerOptions.position(latLng);
                                 markerOptions.title(location);
-                                mMap.addMarker(markerOptions);
+                                lastSearchMarker = mMap.addMarker(markerOptions.draggable(true));
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                                 mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
                             }
@@ -456,7 +463,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 break;
             case R.id.B_to:
                 mMap.clear();
-                Toast.makeText(this, "aaaa", Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "aaaa", Toast.LENGTH_LONG).show();
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(new LatLng(end_latitutde, end_longitude));
                 markerOptions.title("Destination");
