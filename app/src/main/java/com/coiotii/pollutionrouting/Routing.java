@@ -436,11 +436,13 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                                     @Override
                                     public void onMarkerDragEnd(Marker marker) {
                                         //marker.getPosition();
-                                        Toast.makeText(Routing.this, marker + " " + lastSearchMarker + " " + currentLocationMarker, Toast.LENGTH_SHORT).show();
-                                        if (marker == lastSearchMarker)
+                                        Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
+                                        if (marker.getId().equals(lastSearchMarker.getId())) {
                                             lastSearchMarker.setPosition(marker.getPosition());
-                                        else if (marker == currentLocationMarker)
+                                        } else if (marker.getId().equals(currentLocationMarker.getId())) {
+                                            Toast.makeText(Routing.this, "second if", Toast.LENGTH_SHORT).show();
                                             currentLocationMarker.setPosition(marker.getPosition());
+                                        }
                                     }
                                 });
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -501,8 +503,11 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 end_latitutde = lastSearchMarker.getPosition().latitude;
                 end_longitude = lastSearchMarker.getPosition().longitude;
 
+                double start_latitude = currentLocationMarker.getPosition().latitude;
+                double start_longitude = currentLocationMarker.getPosition().longitude;
+
                 float[] res = new float[1];
-                Location.distanceBetween(latitude, longitude, end_latitutde, end_longitude, res);
+                Location.distanceBetween(start_latitude, start_longitude, end_latitutde, end_longitude, res);
 //                markerOptions.snippet("Distance " + res[0]);
                 Toast.makeText(this, "Distance " + res[0], Toast.LENGTH_LONG).show();
 //                mMap.addMarker(markerOptions);
