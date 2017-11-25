@@ -33,17 +33,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/B_search"
-        android:layout_width="80dp"
-        android:layout_height="45dp"
-        android:layout_alignBaseline="@+id/TF_location"
-        android:layout_alignBottom="@+id/TF_location"
-        android:layout_marginStart="26dp"
-        android:layout_toEndOf="@+id/TF_location"
-        android:onClick="onClick"
-        android:text="Search" />
-
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -55,30 +44,73 @@
         android:layout_alignParentStart="true"
         tools:context="com.example.priyanka.mapsdemo.MapsActivity" />
 
+    <!--B location -->
+    <EditText
+        android:id="@+id/B_location"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="65dp"
+        android:ems="10"
+        android:gravity="center"
+        android:inputType="textPersonName"
+        android:hint="go to" />
+    <Button
+        android:id="@+id/B_search"
+        android:layout_width="80dp"
+        android:layout_height="45dp"
+        android:layout_alignBaseline="@+id/B_location"
+        android:layout_alignBottom="@+id/B_location"
+        android:layout_marginStart="26dp"
+        android:layout_toEndOf="@+id/B_location"
+        android:onClick="onClick"
+        android:text="Search" />
+
+    <!--A location-->
+    <EditText
+        android:id="@+id/A_location"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:gravity="center"
+        android:inputType="textPersonName"
+        android:hint="go from" />
+    <Button
+        android:id="@+id/A_search"
+        android:layout_width="80dp"
+        android:layout_height="45dp"
+        android:layout_alignBaseline="@+id/A_location"
+        android:layout_alignBottom="@+id/A_location"
+        android:layout_marginStart="26dp"
+        android:layout_toEndOf="@+id/A_location"
+        android:onClick="onClick"
+        android:text="Search" />
+
 
     <Button
         android:id="@+id/B_to"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/B_search"
-        android:layout_marginEnd="85dp"
-        android:layout_marginTop="70dp"
-        android:layout_toStartOf="@+id/B_search"
+        android:layout_marginEnd="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/A_current_location"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:onClick="onClick"
         android:text="Calculate" />
 
-    <EditText
-        android:id="@+id/TF_location"
+    <Button
+        android:id="@+id/A_current_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="45dp"
-        android:layout_marginTop="57dp"
-        android:ems="10"
-        android:gravity="center"
-        android:inputType="textPersonName"
-        android:text="Name" />
-
+        android:text="from current location"
+        android:onClick="onClick"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
