@@ -278,7 +278,9 @@ import java.util.List;
 public class Routing extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener{
+        LocationListener,
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnMarkerDragListener{
 
 
     private GoogleMap mMap;
@@ -289,6 +291,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude,longitude;
+    double end_latitutde, end_longitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -452,6 +455,19 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 Toast.makeText(Routing.this, "Showing Nearby Restaurants", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.B_to:
+                mMap.clear();
+                Toast.makeText(this, "aaaa", Toast.LENGTH_LONG).show();
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(new LatLng(end_latitutde, end_longitude));
+                markerOptions.title("Destination");
+                markerOptions.draggable(true);
+
+
+                float[] res = new float[5];
+                Location.distanceBetween(latitude, longitude, end_latitutde, end_longitude, res);
+                markerOptions.snippet("Distance " + res[0]);
+                mMap.addMarker(markerOptions);
+                break;
         }
     }
 
@@ -514,6 +530,28 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.setDraggable(true);
+        return false;
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+        marker.setDraggable(true);
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        end_latitutde = marker.getPosition().latitude;
+        end_longitude = marker.getPosition().longitude;
     }
 }
 
