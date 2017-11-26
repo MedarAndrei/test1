@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.coiotii.pollutionrouting.About"
+    android:background="@color/colorPrimary">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:textSize="20dp"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/colorAccent"
+        android:text="Autori: Gabriel-Danut Matei, Andrei Medar, Luca Istrate
+
+Despre aplicatie:
+
+La inceput, utilizatorul se autentifica cu un cont google.
+Aplicatia ii permite utilizatorului sa gaseasca cea mai scurta si cea mai nepoluata ruta intre doua puncte.
+Punctele pot fi alese intre locatia curenta, o adresa cautata sau un anumit punct de pe harta (drag and drop).
+Utilizatorul primeste cele mai bune trei rute si poate alege dintre ele.
+"
+        android:textAlignment="textStart" />
+</android.support.constraint.ConstraintLayout>

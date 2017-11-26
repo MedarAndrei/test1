@@ -47,12 +47,12 @@
     <!--B location -->
     <EditText
         android:id="@+id/B_location"
-        android:layout_width="250dp"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="65dp"
+        android:layout_marginTop="80dp"
         android:ems="10"
         android:gravity="center"
         android:inputType="textPersonName"
@@ -64,20 +64,21 @@
         android:layout_height="45dp"
         android:layout_alignBaseline="@+id/B_location"
         android:layout_alignBottom="@+id/B_location"
-        android:layout_marginStart="26dp"
+        android:layout_marginStart="20dp"
         android:layout_toEndOf="@+id/B_location"
         android:onClick="onClick"
-        android:text="Search" />
+        android:text="Search"
+        android:textColor="@color/colorAccent"/>
 
     <!--A location-->
     <EditText
         android:id="@+id/A_location"
-        android:layout_width="250dp"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         android:ems="10"
         android:gravity="center"
         android:inputType="textPersonName"
@@ -89,10 +90,11 @@
         android:layout_height="45dp"
         android:layout_alignBaseline="@+id/A_location"
         android:layout_alignBottom="@+id/A_location"
-        android:layout_marginStart="26dp"
+        android:layout_marginStart="20dp"
         android:layout_toEndOf="@+id/A_location"
         android:onClick="onClick"
-        android:text="Search" />
+        android:text="Search"
+        android:textColor="@color/colorAccent"/>
 
 
     <Button
@@ -106,15 +108,17 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:onClick="onClick"
+        android:textColor="@color/colorAccent"
         android:text="Calculate" />
 
     <Button
         android:background="@color/buttonColor"
         android:id="@+id/A_current_location"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:text="from current location"
         android:onClick="onClick"
+        android:textColor="@color/colorAccent"
         android:layout_alignParentBottom="true"/>
 
     <Button
@@ -125,6 +129,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TALENT"
+        android:textColor="@color/colorAccent"
         android:onClick="onClick"/>
 
 </RelativeLayout>

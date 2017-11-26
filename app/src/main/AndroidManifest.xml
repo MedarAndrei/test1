@@ -35,8 +35,7 @@
 
         <activity
             android:name=".Routing"
-            android:label="@string/title_activity_routing">
-        </activity>
+            android:label="@string/title_activity_routing"></activity>
         <activity android:name=".Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,6 +43,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".About"
+            android:label="About"></activity>
     </application>
 
 </manifest>

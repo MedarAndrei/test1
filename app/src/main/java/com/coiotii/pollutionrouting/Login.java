@@ -1,11 +1,13 @@
 package com.coiotii.pollutionrouting;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -51,8 +53,16 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
         mAuth = FirebaseAuth.getInstance();
 
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        @SuppressLint("WrongViewCast") SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_WIDE);
+
+        Button aboutButton = findViewById(R.id.about);
+        aboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Login.this, About.class));
+            }
+        });
 
             // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
