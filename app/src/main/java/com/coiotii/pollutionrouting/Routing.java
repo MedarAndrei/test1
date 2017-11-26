@@ -306,8 +306,11 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 DateTime now = new DateTime();
                 DirectionsResult result = null;
                 try {
-                    String originString = currentLocationMarker.getPosition().latitude + "," + currentLocationMarker.getPosition().longitude;
-                    String destString = lastSearchMarker.getPosition().latitude + "," + lastSearchMarker.getPosition().longitude;
+                    LatLng orig = currentLocationMarker.getPosition();
+                    String originString = orig.latitude + "," + orig.longitude;
+
+                    LatLng dest = lastSearchMarker.getPosition();
+                    String destString = dest.latitude + "," + dest.longitude;
 
                     result = DirectionsApi.newRequest(getGeoContext())
                             .mode(TravelMode.DRIVING).origin(originString)
@@ -322,9 +325,6 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 }
 
                 List<LatLng> decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
-                Toast.makeText(this, decodedPath.toString(), Toast.LENGTH_LONG).show();
-                Toast.makeText(this, result.routes[0].overviewPolyline.getEncodedPath(), Toast.LENGTH_LONG).show();
-                Toast.makeText(this, currentLocationMarker.getPosition().toString(), Toast.LENGTH_LONG).show();
                 mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
 
                 break;
