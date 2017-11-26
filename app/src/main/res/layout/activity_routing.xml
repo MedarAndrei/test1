@@ -117,4 +117,14 @@
         android:onClick="onClick"
         android:layout_alignParentBottom="true"/>
 
+    <Button
+        android:background="@color/buttonColor"
+        android:id="@+id/breeze"
+        android:translationX="50dp"
+        android:translationY="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TALENT"
+        android:onClick="onClick"/>
+
 </RelativeLayout>

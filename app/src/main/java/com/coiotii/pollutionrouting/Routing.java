@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -39,9 +40,17 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -364,20 +373,56 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                             currentPolyline.setZIndex(10);
                         }
                     });
-
-//                    if (result.routes.length == 3) {
-//                        decodedPath = decodePoly(result.routes[1].overviewPolyline.getEncodedPath());
-//                        drawnPolylines.add(mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa)));
-//                        decodedPath = decodePoly(result.routes[2].overviewPolyline.getEncodedPath());
-//                        drawnPolylines.add(mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa)));
-//                    }
-//                    decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
-//                    currentPolyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffff6c00));
-//                    drawnPolylines.add(currentPolyline);
                 }
+                break;
+            case R.id.breeze:
+                LatLng orig = currentLocationMarker.getPosition();
 
+                URI uri = null;
+                try {
+                    uri = new URI("https://api.breezometer.com/baqi/?lat="+orig.latitude+"&lon="+orig.longitude+"&key=1e10205fedfb48ac9212263c8c9afc04");
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+                AsyncTask<URI, Integer, String> a = new AsyncTask<URI, Integer, String>() {
+
+                    @Override
+                    protected String doInBackground(URI... uris) {
+                        return getAQ(uris[0]);
+                    }
+
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        Toast.makeText(Routing.this, s, Toast.LENGTH_LONG).show();
+                    }
+                };
+                a.execute(uri);
+
+                //Toast.makeText(this, response, Toast.LENGTH_LONG).show();
                 break;
         }
+    }
+
+
+    public String getAQ(URI uri) {
+        HttpResponse response;
+        String responseString = "";
+
+        try{
+            //Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
+            HttpGet request = new HttpGet(uri);
+            HttpClient client = new DefaultHttpClient();
+            response = client.execute(request);
+            HttpEntity httpEntity = response.getEntity();
+            responseString = EntityUtils.toString(httpEntity);
+        } catch (Exception e){
+            //Toast.makeText(this, "CRASHES SOMEWHERE OMG", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
+        return responseString;
+
     }
 
     private List<LatLng> decodePoly(String encoded) {
@@ -412,21 +457,6 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         }
 
         return poly;
-    }
-
-
-    private String getUrl(double latitude, double longitude, String nearbyPlace) {
-
-        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location=" + latitude + "," + longitude);
-        googlePlaceUrl.append("&radius=" + PROXIMITY_RADIUS);
-        googlePlaceUrl.append("&type=" + nearbyPlace);
-        googlePlaceUrl.append("&sensor=true");
-        googlePlaceUrl.append("&key=" + "AIzaSyBLEPBRfw7sMb73Mr88L91Jqh3tuE4mKsE");
-
-        Log.d("MapsActivity", "url = " + googlePlaceUrl.toString());
-
-        return googlePlaceUrl.toString();
     }
 
     @Override
