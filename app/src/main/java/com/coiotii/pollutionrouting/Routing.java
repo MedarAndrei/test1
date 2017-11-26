@@ -6,11 +6,11 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -19,11 +19,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -31,9 +31,19 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
+
+import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Routing extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -52,6 +62,17 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
     double end_latitutde, end_longitude;
+
+    //directions api key
+    //AIzaSyDhs2hwfjjmR1w3r-mNg95wvFc55qyGE_I
+    private GeoApiContext getGeoContext() {
+        GeoApiContext geoApiContext = new GeoApiContext();
+        return geoApiContext.setQueryRateLimit(3)
+                .setApiKey("AIzaSyDhs2hwfjjmR1w3r-mNg95wvFc55qyGE_I")
+                .setConnectTimeout(1, TimeUnit.SECONDS)
+                .setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -281,8 +302,67 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
 //                markerOptions.snippet("Distance " + res[0]);
                 Toast.makeText(this, "Distance " + res[0], Toast.LENGTH_LONG).show();
 //                mMap.addMarker(markerOptions);
+
+                DateTime now = new DateTime();
+                DirectionsResult result = null;
+                try {
+                    String originString = currentLocationMarker.getPosition().latitude + "," + currentLocationMarker.getPosition().longitude;
+                    String destString = lastSearchMarker.getPosition().latitude + "," + lastSearchMarker.getPosition().longitude;
+
+                    result = DirectionsApi.newRequest(getGeoContext())
+                            .mode(TravelMode.DRIVING).origin(originString)
+                            .destination(destString)
+                            .departureTime(now).await();
+                } catch (ApiException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                List<LatLng> decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
+                Toast.makeText(this, decodedPath.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, result.routes[0].overviewPolyline.getEncodedPath(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, currentLocationMarker.getPosition().toString(), Toast.LENGTH_LONG).show();
+                mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+
                 break;
         }
+    }
+
+    private List<LatLng> decodePoly(String encoded) {
+
+        List<LatLng> poly = new ArrayList<LatLng>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng((((double) lat / 1E5)),
+                    (((double) lng / 1E5)));
+            poly.add(p);
+        }
+
+        return poly;
     }
 
 
