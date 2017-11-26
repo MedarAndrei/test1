@@ -225,12 +225,18 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                             @Override
                             public void onMarkerDragEnd(Marker marker) {
                                 //marker.getPosition();
-                                Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
-                                if (marker.getId().equals(lastSearchMarker.getId())) {
+                                //Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
+                                if (lastSearchMarker != null && marker.getId().equals(lastSearchMarker.getId())) {
                                     lastSearchMarker.setPosition(marker.getPosition());
-                                } else if (marker.getId().equals(currentLocationMarker.getId())) {
+                                }
+                                if (currentLocationMarker != null && marker.getId().equals(currentLocationMarker.getId())) {
                                     currentLocationMarker.setPosition(marker.getPosition());
                                 }
+
+                                for (Polyline l: drawnPolylines) {
+                                    l.remove();
+                                }
+                                drawnPolylines.clear();
                             }
                         });
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
@@ -283,12 +289,19 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                             public void onMarkerDragEnd(Marker marker) {
                                 //marker.getPosition();
                                 //TODO check if they're null
-                                Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
-                                if (marker.getId().equals(lastSearchMarker.getId())) {
+                                //Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
+
+                                if (lastSearchMarker != null && marker.getId().equals(lastSearchMarker.getId())) {
                                     lastSearchMarker.setPosition(marker.getPosition());
-                                } else if (marker.getId().equals(currentLocationMarker.getId())) {
+                                }
+                                if (currentLocationMarker != null && marker.getId().equals(currentLocationMarker.getId())) {
                                     currentLocationMarker.setPosition(marker.getPosition());
                                 }
+
+                                for (Polyline l: drawnPolylines) {
+                                    l.remove();
+                                }
+                                drawnPolylines.clear();
                             }
                         });
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
@@ -308,13 +321,25 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         switch (v.getId()) {
             case R.id.B_search:
                 searchTo();
+                for (Polyline l: drawnPolylines) {
+                    l.remove();
+                }
+                drawnPolylines.clear();
                 break;
             case R.id.A_search:
                 searchFrom();
+                for (Polyline l: drawnPolylines) {
+                    l.remove();
+                }
+                drawnPolylines.clear();
                 break;
             case R.id.A_current_location:
                 currentLocationMarker.setPosition(new LatLng(latitude, longitude));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocationMarker.getPosition(), 14));
+                for (Polyline l: drawnPolylines) {
+                    l.remove();
+                }
+                drawnPolylines.clear();
                 break;
             case R.id.B_to:
 
@@ -358,9 +383,10 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                     for (Polyline l: drawnPolylines) {
                         l.remove();
                     }
+                    drawnPolylines.clear();
 
                     //get the new routes
-                    Toast.makeText(this, new Integer(result.routes.length).toString(), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, new Integer(result.routes.length).toString(), Toast.LENGTH_LONG).show();
                     for (int i = result.routes.length - 1; i >= 1; i--) {
                         List<LatLng> decodedPath = decodePoly(result.routes[i].overviewPolyline.getEncodedPath());
                         Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa));
@@ -396,27 +422,19 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                 }
                 break;
             case R.id.breeze:
-
-
-
-
                 scoreSum.clear();
                 routeScores.clear();
                 amountOfPointsPerRoute.clear();
                 amountOfPointsSoFar = 0;
                 totalAmountOfPoints = 0;
-
+                Log.d("SHIT PISS ", new Integer(drawnPolylines.size()).toString());
                 for (int i = 0; i < drawnPolylines.size(); i++) {
                     scoreSum.add(0);
                     routeScores.add(0);
                     amountOfPointsPerRoute.add(drawnPolylines.get(i).getPoints().size() / 8);
-                    totalAmountOfPoints = i * 8 + 8;
-//                    for (int j = 0; j < drawnPolylines.get(i).getPoints().size(); j += 8) {
-//                        totalAmountOfPoints++;
-//                        amountOfPointsPerRoute.set(i, amountOfPointsPerRoute.get(i) + 1);
-//                    }
-//                    totalAmountOfPoints += drawnPolylines.get(i).getPoints().size() / 8;
+
                 }
+                totalAmountOfPoints = drawnPolylines.size() * 8;
 
 
 
@@ -426,7 +444,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                         double olatitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).latitude;
                         double olongitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).longitude;
                         try {
-                            uri = new URI("https://api.breezometer.com/baqi/?lat="+olatitude+"&lon="+olongitude+"&fields=breezometer_aqi&key=deeb4795f89f4d15a2723566069d9568");
+                            uri = new URI("https://api.breezometer.com/baqi/?lat="+olatitude+"&lon="+olongitude+"&fields=breezometer_aqi&key=af4d31d90127499dad8b0352fdc8da62");
                         } catch (URISyntaxException e) {
                             e.printStackTrace();
                         }
@@ -452,7 +470,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                                 Log.d("ASYNC ", amountOfPointsSoFar + " " + totalAmountOfPoints);
                                 amountOfPointsSoFar++;
 
-                                mMap.addMarker(new MarkerOptions().position(new LatLng(s.latitude, s.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                //mMap.addMarker(new MarkerOptions().position(new LatLng(s.latitude, s.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
                                 if (amountOfPointsSoFar == totalAmountOfPoints) {
 //                                    we are done
@@ -462,7 +480,14 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                                         routeScores.set(i, scoreSum.get(i) / 8 );
                                     }
 
-                                    Toast.makeText(Routing.this, "Boss de boss, barosan", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(Routing.this, "Done calculating polutions, updating best path", Toast.LENGTH_LONG).show();
+                                    int maxi  = 0;
+                                    for (int i = 0; i < drawnPolylines.size(); i++) {
+                                        if (routeScores.get(i) > routeScores.get(maxi)) {
+                                            maxi = i;
+                                        }
+                                    }
+                                    changeActivePolyline(drawnPolylines.get(maxi));
                                 }
                             }
                         };
@@ -516,7 +541,11 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         ret.latitude = pair.latitude;
         ret.longitude = pair.longitude;
         String num = responseString.substring(responseString.indexOf(' ')+1, responseString.lastIndexOf('}'));
-        ret.retVal = new Integer(num);
+        Integer finRet = 50;
+        try {
+            finRet = new Integer(num);
+        } catch (Exception e) {}
+        ret.retVal = finRet;
         return ret;
 
     }
@@ -598,6 +627,24 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         marker.setDraggable(true);
         return false;
     }
+
+    public void changeActivePolyline(Polyline polyline) {
+        if (polyline.getId().equals(currentPolyline.getId())) {
+            return;
+        }
+
+        currentPolyline.setColor(0xffaaaaaa);
+        currentPolyline.setZIndex(0);
+        polyline.setColor(0xffff6c00);
+        currentPolyline = polyline;
+        currentPolyline.setZIndex(10);
+
+        int index = drawnPolylines.indexOf(currentPolyline);
+        if (routeScores.size() != 0) {
+            //Toast.makeText(Routing.this, new Integer(routeScores.get(index)).toString(), Toast.LENGTH_LONG).show();
+        }
+    }
+
 }
 
 
