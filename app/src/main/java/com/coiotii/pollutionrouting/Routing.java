@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -62,6 +63,8 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
     double end_latitutde, end_longitude;
+    private Polyline currentPolyline = null;
+    private ArrayList<Polyline> drawnPolylines = new ArrayList<Polyline>();
 
     //directions api key
     //AIzaSyDhs2hwfjjmR1w3r-mNg95wvFc55qyGE_I
@@ -315,7 +318,9 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                     result = DirectionsApi.newRequest(getGeoContext())
                             .mode(TravelMode.DRIVING).origin(originString)
                             .destination(destString)
-                            .departureTime(now).await();
+                            .departureTime(now)
+                            .alternatives(true)
+                            .await();
                 } catch (ApiException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -324,8 +329,52 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                     e.printStackTrace();
                 }
 
-                List<LatLng> decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
-                mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+                if (result != null) {
+                    //delete the old  routes
+                    for (Polyline l: drawnPolylines) {
+                        l.remove();
+                    }
+
+                    //get the new routes
+                    Toast.makeText(this, new Integer(result.routes.length).toString(), Toast.LENGTH_LONG).show();
+                    for (int i = result.routes.length - 1; i >= 1; i--) {
+                        List<LatLng> decodedPath = decodePoly(result.routes[i].overviewPolyline.getEncodedPath());
+                        Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa));
+                        poly.setClickable(true);
+                        poly.setZIndex(0);
+                        drawnPolylines.add(poly);
+                    }
+                    List<LatLng> decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
+                    currentPolyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffff6c00));
+                    currentPolyline.setClickable(true);
+                    currentPolyline.setZIndex(10);
+                    drawnPolylines.add(currentPolyline);
+
+                    mMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                        @Override
+                        public void onPolylineClick(Polyline polyline) {
+                            if (polyline.getId().equals(currentPolyline.getId())) {
+                                return;
+                            }
+
+                            currentPolyline.setColor(0xffaaaaaa);
+                            currentPolyline.setZIndex(0);
+                            polyline.setColor(0xffff6c00);
+                            currentPolyline = polyline;
+                            currentPolyline.setZIndex(10);
+                        }
+                    });
+
+//                    if (result.routes.length == 3) {
+//                        decodedPath = decodePoly(result.routes[1].overviewPolyline.getEncodedPath());
+//                        drawnPolylines.add(mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa)));
+//                        decodedPath = decodePoly(result.routes[2].overviewPolyline.getEncodedPath());
+//                        drawnPolylines.add(mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffaaaaaa)));
+//                    }
+//                    decodedPath = decodePoly(result.routes[0].overviewPolyline.getEncodedPath());
+//                    currentPolyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(0xffff6c00));
+//                    drawnPolylines.add(currentPolyline);
+                }
 
                 break;
         }
