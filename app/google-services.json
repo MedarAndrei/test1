@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "677951045316",
+    "firebase_url": "https://test1-df9ae.firebaseio.com",
+    "project_id": "test1-df9ae",
+    "storage_bucket": "test1-df9ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677951045316:android:435f01972c1837dd",
+        "android_client_info": {
+          "package_name": "com.coiotii.pollutionrouting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "677951045316-on6gtf3apndqef1ls8maq0ddrun3bp90.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.coiotii.pollutionrouting",
+            "certificate_hash": "f2c8642cad6df6c160cbc78905f94197a13e463d"
+          }
+        },
+        {
+          "client_id": "677951045316-pu16jispi6a92imtmnsjcls92saoiiq3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA085r8nxuk3eefueb9wgJ9oTSGBQViQBA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "677951045316-pu16jispi6a92imtmnsjcls92saoiiq3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
