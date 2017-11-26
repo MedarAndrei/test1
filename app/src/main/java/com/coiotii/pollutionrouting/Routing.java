@@ -53,6 +53,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Routing extends FragmentActivity implements OnMapReadyCallback,
@@ -74,6 +76,15 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
     double end_latitutde, end_longitude;
     private Polyline currentPolyline = null;
     private ArrayList<Polyline> drawnPolylines = new ArrayList<Polyline>();
+    private ArrayList<Integer> scoreSum = new ArrayList<Integer>();
+    private ArrayList<Integer> routeScores = new ArrayList<Integer>();
+    private ArrayList<Integer> amountOfPointsPerRoute = new ArrayList<Integer>();
+    private int totalAmountOfPoints = 0;
+    private int amountOfPointsSoFar = 0;
+    ThreadPoolExecutor tpe = new ThreadPoolExecutor(100, 5000,
+                                                    1, TimeUnit.MINUTES,
+                                                    new LinkedBlockingDeque<Runnable>());
+
 
     //directions api key
     //AIzaSyDhs2hwfjjmR1w3r-mNg95wvFc55qyGE_I
@@ -99,6 +110,8 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
     @Override
@@ -166,6 +179,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
         }
         currentLocationMarker = mMap.addMarker(markerOptions);
+
 
 
         if (client != null) {
@@ -268,6 +282,7 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                             @Override
                             public void onMarkerDragEnd(Marker marker) {
                                 //marker.getPosition();
+                                //TODO check if they're null
                                 Toast.makeText(Routing.this, marker.getId() + " " + lastSearchMarker.getId() + " " + currentLocationMarker.getId(), Toast.LENGTH_SHORT).show();
                                 if (marker.getId().equals(lastSearchMarker.getId())) {
                                     lastSearchMarker.setPosition(marker.getPosition());
@@ -371,41 +386,115 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
                             polyline.setColor(0xffff6c00);
                             currentPolyline = polyline;
                             currentPolyline.setZIndex(10);
+
+                            int index = drawnPolylines.indexOf(currentPolyline);
+                            if (routeScores.size() != 0) {
+                                Toast.makeText(Routing.this, new Integer(routeScores.get(index)).toString(), Toast.LENGTH_LONG).show();
+                            }
                         }
                     });
                 }
                 break;
             case R.id.breeze:
-                LatLng orig = currentLocationMarker.getPosition();
 
-                URI uri = null;
-                try {
-                    uri = new URI("https://api.breezometer.com/baqi/?lat="+orig.latitude+"&lon="+orig.longitude+"&key=1e10205fedfb48ac9212263c8c9afc04");
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
+
+
+
+                scoreSum.clear();
+                routeScores.clear();
+                amountOfPointsPerRoute.clear();
+                amountOfPointsSoFar = 0;
+                totalAmountOfPoints = 0;
+
+                for (int i = 0; i < drawnPolylines.size(); i++) {
+                    scoreSum.add(0);
+                    routeScores.add(0);
+                    amountOfPointsPerRoute.add(drawnPolylines.get(i).getPoints().size() / 8);
+                    totalAmountOfPoints = i * 8 + 8;
+//                    for (int j = 0; j < drawnPolylines.get(i).getPoints().size(); j += 8) {
+//                        totalAmountOfPoints++;
+//                        amountOfPointsPerRoute.set(i, amountOfPointsPerRoute.get(i) + 1);
+//                    }
+//                    totalAmountOfPoints += drawnPolylines.get(i).getPoints().size() / 8;
                 }
-                AsyncTask<URI, Integer, String> a = new AsyncTask<URI, Integer, String>() {
 
-                    @Override
-                    protected String doInBackground(URI... uris) {
-                        return getAQ(uris[0]);
+
+
+                for (int i = 0; i < drawnPolylines.size(); i++) {
+                    for (int j = 0; j < 8; j++) {
+                        URI uri = null;
+                        double olatitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).latitude;
+                        double olongitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).longitude;
+                        try {
+                            uri = new URI("https://api.breezometer.com/baqi/?lat="+olatitude+"&lon="+olongitude+"&fields=breezometer_aqi&key=deeb4795f89f4d15a2723566069d9568");
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+
+                        GetAQPair param = new GetAQPair();
+                        param.uri = uri;
+                        param.latitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).latitude;
+                        param.longitude = drawnPolylines.get(i).getPoints().get(j * amountOfPointsPerRoute.get(i)).longitude;
+                        param.route = i;
+
+                        AsyncTask<GetAQPair, Void, GetAQRet> a = new AsyncTask<GetAQPair, Void, GetAQRet>() {
+
+                            @Override
+                            protected GetAQRet doInBackground(GetAQPair... pairs) {
+                                return getAQ(pairs[0]);
+                            }
+
+
+                            @Override
+                            protected void onPostExecute(GetAQRet s) {
+                                //Toast.makeText(Routing.this, new Integer(s.retVal).toString(), Toast.LENGTH_LONG).show();
+                                scoreSum.set(s.route, scoreSum.get(s.route) + s.retVal);
+                                Log.d("ASYNC ", amountOfPointsSoFar + " " + totalAmountOfPoints);
+                                amountOfPointsSoFar++;
+
+                                mMap.addMarker(new MarkerOptions().position(new LatLng(s.latitude, s.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+                                if (amountOfPointsSoFar == totalAmountOfPoints) {
+//                                    we are done
+                                    for (int i = 0; i < routeScores.size(); i++) {
+                                        Log.d("End ASYNC sums", scoreSum.get(i).toString());
+                                        Log.d("END ASYNC ", amountOfPointsPerRoute.get(i) + " " + scoreSum.get(i));
+                                        routeScores.set(i, scoreSum.get(i) / 8 );
+                                    }
+
+                                    Toast.makeText(Routing.this, "Boss de boss, barosan", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        };
+//                        a.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, param);
+                        a.executeOnExecutor(tpe, param);
+//                        a.execute(param);
                     }
-
-
-                    @Override
-                    protected void onPostExecute(String s) {
-                        Toast.makeText(Routing.this, s, Toast.LENGTH_LONG).show();
-                    }
-                };
-                a.execute(uri);
+                }
 
                 //Toast.makeText(this, response, Toast.LENGTH_LONG).show();
                 break;
         }
     }
 
+    private class GetAQPair {
+        public URI uri;
+        public double longitude;
+        public double latitude;
+        public int route;
+        public int route_index;
+    }
 
-    public String getAQ(URI uri) {
+    private class GetAQRet {
+        public int retVal;
+        public double longitude;
+        public double latitude;
+        public int route;
+        public int route_index;
+    }
+
+    public GetAQRet getAQ(GetAQPair pair) {
+        URI uri = pair.uri;
         HttpResponse response;
         String responseString = "";
 
@@ -421,7 +510,14 @@ public class Routing extends FragmentActivity implements OnMapReadyCallback,
             e.printStackTrace();
         }
 
-        return responseString;
+        GetAQRet ret = new GetAQRet();
+        ret.route = pair.route;
+        ret.route_index = pair.route_index;
+        ret.latitude = pair.latitude;
+        ret.longitude = pair.longitude;
+        String num = responseString.substring(responseString.indexOf(' ')+1, responseString.lastIndexOf('}'));
+        ret.retVal = new Integer(num);
+        return ret;
 
     }
 
